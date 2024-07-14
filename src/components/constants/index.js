@@ -1,3 +1,3 @@
 export const STYLES_CARD = {
-  width: 300
+  width: 300,
 };
