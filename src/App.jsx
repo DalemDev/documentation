@@ -7,6 +7,7 @@ import { capitalizeWords, STYLES_CONTAINER_CARDS } from './constants';
 import './css/app.css';
 import { useDispatch, useSelector } from 'react-redux';
 import { addDocuments } from './redux/reducers/documentSlice'
+import { FileOutlined, FolderOutlined, LinuxOutlined } from '@ant-design/icons';
 
 function App() {
   const markdowns = useSelector(state => state.documents.value);
@@ -33,9 +34,21 @@ function App() {
     ));
   }, [markdowns]);
 
+  const markdownRecursosFormated = useMemo(() => {
+    return (markdowns?.recursos || []).map((markdown, index) => (
+      <Card
+        key={index}
+        title={markdown?.name}
+        identificator='recursos'
+      />
+    ));
+  }, [markdowns]);
+
   const items = useMemo(() => ([
     {
-      label: 'Documentaciones',
+      label: (
+        <span><FileOutlined /> Documentaciones</span>
+      ),
       key: 'documentaciones',
       children: (
         <div style={STYLES_CONTAINER_CARDS}>
@@ -44,16 +57,29 @@ function App() {
       )
     },
     {
-      label: 'Soportes',
+      label: (
+        <span><FolderOutlined /> Soportes</span>
+      ),
       key: 'soportes',
       children: (
         <div style={STYLES_CONTAINER_CARDS}>
           {markdownSoportesFormated}
         </div>
       )
+    },
+    {
+      label: (
+        <span><LinuxOutlined /> Recursos Y Herramientas</span>
+      ),
+      key: 'recursos',
+      children: (
+        <div style={STYLES_CONTAINER_CARDS}>
+          {markdownRecursosFormated}
+        </div>
+      )
     }
   ]
-  ), [markdownDocumentacionesFormated, markdownSoportesFormated]);
+  ), [markdownDocumentacionesFormated, markdownSoportesFormated, markdownRecursosFormated]);
 
   useEffect(() => {
     const loadMarkdownsFiles = async () => {
@@ -100,9 +126,31 @@ function App() {
 
         const markdownContentsSoportes = await Promise.all(markdownPromisesSoportes);
 
+
+        const filesRecursos = import.meta.glob(`/src/assets/documents/recursos/*.md`);
+
+        const markdownPromisesRecursos = Object.keys(filesRecursos).map(async (filename) => {
+          const response = await fetch(filename);
+
+          if (!response.ok) {
+            throw new Error(`Error al cargar el archivo ${filename}: ${response.status}`)
+          }
+
+          const markdown = await response.text();
+          const html = md.render(markdown);
+
+          const separated = filename.split('/');
+          const name = capitalizeWords(separated[separated.length - 1].replace('_', ' ').replace('.md', ''));
+
+          return { name, content: html };
+        })
+
+        const markdownContentsRecursos = await Promise.all(markdownPromisesRecursos);
+
         const informacion = {
           documentaciones: markdownContentsDocumentaciones,
-          soportes: markdownContentsSoportes
+          soportes: markdownContentsSoportes,
+          recursos: markdownContentsRecursos
         };
 
         dispatch(addDocuments(informacion));
