@@ -1,13 +1,13 @@
 import { EyeOutlined } from "@ant-design/icons";
-import { Card as CardAntd, Modal } from "antd";
-import Meta from "antd/lib/card/Meta";
+import { Card as CardAntd } from "antd";
 import PropTypes from 'prop-types';
-import CoverPost from '../assets/images/post-cover.jpg';
-import CoverSoporte from '../assets/images/soporte-cover.png';
-import CoverRecurso from '../assets/images/recurso-cover.webp';
-import { STYLES_CARD } from "./constants";
 import { useMemo, useState } from "react";
 import { useSelector } from "react-redux";
+import CoverPost from '../assets/images/post-cover.jpg';
+import CoverRecurso from '../assets/images/recurso-cover.webp';
+import CoverSoporte from '../assets/images/soporte-cover.png';
+import { STYLES_CARD } from "./constants";
+import Post from "./Post";
 
 
 export default function Card({ title = '', url_image = '', identificator = '' }) {
@@ -40,11 +40,11 @@ export default function Card({ title = '', url_image = '', identificator = '' })
 
   return (
     <>
-      <Modal width={1000} open={modal} onCancel={() => setModal(false)} footer={null}>
-        {post && (
-          <div dangerouslySetInnerHTML={{ __html: post }} />
-        )}
-      </Modal>
+      <Post
+        open={modal}
+        onCancel={() => setModal(false)}
+        post={post}
+      />
       <CardAntd
         style={STYLES_CARD}
         cover={
